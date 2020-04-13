@@ -1,23 +1,23 @@
 variable "general_purpose_machine_type" {
-  type = "string"
+  type = string
   description = "Machine type to use for the general-purpose node pool. See https://cloud.google.com/compute/docs/machine-types"
 }
 
 variable "general_purpose_min_node_count" {
-  type = "string"
+  type = string
   description = "The minimum number of nodes PER ZONE in the general-purpose node pool"
   default = 1
 }
 
 variable "general_purpose_max_node_count" {
-  type = "string"
+  type = string
   description = "The maximum number of nodes PER ZONE in the general-purpose node pool"
   default = 5
 }
 
 resource "google_container_cluster" "cluster" {
   name     = "${var.project}-cluster"
-  location = "${var.region}"
+  location = var.region
 
   # We can't create a cluster with no node pool defined, but we want to only use
   # separately managed node pools. So we create the smallest possible default
@@ -45,8 +45,8 @@ resource "google_container_cluster" "cluster" {
 
 resource "google_container_node_pool" "general_purpose" {
   name       = "${var.project}-general"
-  location   = "${var.region}"
-  cluster    = "${google_container_cluster.cluster.name}"
+  location   = var.region
+  cluster    = google_container_cluster.cluster.name
 
   management { 
     auto_repair = "true"
@@ -54,13 +54,13 @@ resource "google_container_node_pool" "general_purpose" {
   }
 
   autoscaling { 
-    min_node_count = "${var.general_purpose_min_node_count}"
-    max_node_count = "${var.general_purpose_max_node_count}"
+    min_node_count = var.general_purpose_min_node_count
+    max_node_count = var.general_purpose_max_node_count
   }
-  initial_node_count = "${var.general_purpose_min_node_count}"
+  initial_node_count = var.general_purpose_min_node_count
 
   node_config {
-    machine_type = "${var.general_purpose_machine_type}"
+    machine_type = var.general_purpose_machine_type
 
     metadata = {
       disable-legacy-endpoints = "true"
@@ -79,13 +79,13 @@ resource "google_container_node_pool" "general_purpose" {
 # The following outputs allow authentication and connectivity to the GKE Cluster
 # by using certificate-based authentication.
 output "client_certificate" {
-  value = "${google_container_cluster.cluster.master_auth.0.client_certificate}"
+  value = google_container_cluster.cluster.master_auth.0.client_certificate
 }
 
 output "client_key" {
-  value = "${google_container_cluster.cluster.master_auth.0.client_key}"
+  value = google_container_cluster.cluster.master_auth.0.client_key
 }
 
 output "cluster_ca_certificate" {
-  value = "${google_container_cluster.cluster.master_auth.0.cluster_ca_certificate}"
+  value = google_container_cluster.cluster.master_auth.0.cluster_ca_certificate
 }

@@ -1,24 +1,24 @@
 variable "project" {
-  type = "string"
+  type = string
   description = "Google Cloud project name"
 }
 
 variable "region" {
-  type = "string"
+  type = string
   description = "Default Google Cloud region"
 }
 
 terraform {
   backend "gcs" {
-    bucket = "gke-from-scratch-terraform-state"
+    bucket = "terraform-state-gke-hamcodev"
     prefix = "terraform"
     credentials = "account.json"
   }
 }
 
 provider "google" {
-  credentials = "${file("account.json")}"
-  project     = "${var.project}"
-  region      = "${var.region}"
+  credentials = file("account.json")
+  project     = var.project
+  region      = var.region
 }
 
